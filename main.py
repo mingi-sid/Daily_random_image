@@ -97,7 +97,8 @@ def main():
 		return
 
 	prev_data = {}
-	prev_data = read_list()
+	if not '-i' in sys.argv:
+		prev_data = read_list()
 
 	if '-v' in sys.argv:
 		print '\nPrevious file list:'
@@ -208,6 +209,7 @@ In file_data & file path is matched
 	sorted_keys = []		#To prevent referring legacy data
 
 	print 'target_img :', target_img_name
+	new_img_name = ''
 
 	if not target_img_name == '':
 		if os.path.isfile(TARGET_DIR + '/'+TARGET_FILE+'.png'):
@@ -222,11 +224,17 @@ In file_data & file path is matched
 				print e
 		if target_img_name[-4:] == '.png':
 			shutil.copyfile(target_img_name, TARGET_DIR + '/'+TARGET_FILE+'.png')
+			new_img_name = TARGET_DIR + '/'+TARGET_FILE+'.png'
 		else:
 			shutil.copyfile(target_img_name, TARGET_DIR + '/'+TARGET_FILE+'.jpg')
+			new_img_name = TARGET_DIR + '/'+TARGET_FILE+'.jpg'
+	
 
 	write_list(new_sorted)
 
-	twitter.post_on_twitter(target_img_name)
+	if '-i' in sys.argv:
+		twitter.main()
+
+	twitter.post_on_twitter(new_img_name)
 #End of main()
 main()
