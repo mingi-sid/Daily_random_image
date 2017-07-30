@@ -1,0 +1,4 @@
+[filesystem]
+image_dir = /home/photo/randomimgs
+target_dir = /var/www/html
+target_file = random_img

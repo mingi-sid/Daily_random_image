@@ -6,10 +6,27 @@ import time
 import hashlib
 import random
 import shutil
+from ConfigParser import SafeConfigParser
+import codecs
 
+import twitter
+
+parser = SafeConfigParser()
+
+with codecs.open('setting.ini', 'r', encoding='utf-8') as f:
+	parser.readfp(f)
+
+IMAGES_DIR = parser.get('filesystem', 'image_dir')
+TARGET_DIR = parser.get('filesystem', 'target_dir')
+TARGET_FILE = parser.get('filesystem', 'target_file')
+
+'''
 IMAGES_DIR = u"/mnt/d/Personal/KAIST/PASSION/170619_daily_random_image/Daily_random_image"#u"/home/hamster/열변"
+TARGET_DIR = u"/mnt/d/Personal/KAIST/PASSION/170619_daily_random_image/target"
+TARGET_FILE = u"random_yeolbyeon"
+'''
+
 TARGET_EXT = [u'jpg', u'bmp', u'png']
-TARGET_DST = u"/mnt/d/Personal/KAIST/PASSION/170619_daily_random_image/Daily_random_image"
 IMAGE_LIST = u"imglist.txt"
 HELP_MESSAGE = """  -h	Print this help message
   -f	Print hash and timestamp of image files
@@ -193,19 +210,23 @@ In file_data & file path is matched
 	print 'target_img :', target_img_name
 
 	if not target_img_name == '':
-		try:
-			os.remove(TARGET_DST+'/random_yeolbyeon.png')
-		except OSError as e:
-			print e
-		try:
-			os.remove(TARGET_DST+'/random_yeolbyeon.jpg')
-		except OSError as e:
-			print e
+		if os.path.isfile(TARGET_DIR + '/'+TARGET_FILE+'.png'):
+			try:
+				os.remove(TARGET_DIR+'/'+TARGET_FILE+'.png')
+			except OSError as e:
+				print e
+		if os.path.isfile(TARGET_DIR + '/'+TARGET_FILE+'.jpg'):
+			try:
+				os.remove(TARGET_DIR+'/'+TARGET_FILE+'.jpg')
+			except OSError as e:
+				print e
 		if target_img_name[-4:] == '.png':
-			shutil.copyfile(target_img_name, TARGET_DST + '/random_yeolbyeon.png')
+			shutil.copyfile(target_img_name, TARGET_DIR + '/'+TARGET_FILE+'.png')
 		else:
-			shutil.copyfile(target_img_name, TARGET_DST + '/random_yeolbyeon.jpg')
+			shutil.copyfile(target_img_name, TARGET_DIR + '/'+TARGET_FILE+'.jpg')
 
 	write_list(new_sorted)
+
+	twitter.post_on_twitter(target_img_name)
 #End of main()
 main()

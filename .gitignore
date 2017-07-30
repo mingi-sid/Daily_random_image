@@ -108,3 +108,5 @@ ENV/
 *.tiff
 *.bmp
 *.txt
+*.ini
+/한글 폴더
