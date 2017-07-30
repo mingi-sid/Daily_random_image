@@ -4,14 +4,18 @@
 import glob, os, sys
 import time
 import hashlib
+import random
+import shutil
 
 IMAGES_DIR = u"/mnt/d/Personal/KAIST/PASSION/170619_daily_random_image/Daily_random_image"#u"/home/hamster/열변"
 TARGET_EXT = [u'jpg', u'bmp', u'png']
+TARGET_DST = u"/mnt/d/Personal/KAIST/PASSION/170619_daily_random_image/Daily_random_image"
 IMAGE_LIST = u"imglist.txt"
 HELP_MESSAGE = """  -h	Print this help message
   -f	Print hash and timestamp of image files
   -r	Read text file and print result
-  -n	Print merged imglist.txt, not actually modifying it
+  -n	Print merged list of images
+  -N	Print merged imglist.txt, not actually modifying it
   -v	Verbose run
   -i	Initial run."""
 TIMESTAMP = int(time.time())
@@ -39,6 +43,25 @@ def read_list():
 			timestamp = (line[:]).strip()
 	f.close()
 	return data
+
+def time_based_sort(data):
+	"""Return dictionary having time as key of image file data"""
+	result = {}
+	for key in data.keys():
+		if result.has_key(data[key][1]):
+			result[data[key][1]].append( (key, data[key][0]) )
+		else:
+			result[data[key][1]] = [(key, data[key][0])]
+	return result
+
+def write_list(data):
+	f = open(u"temp.txt", 'w')
+	sorted_keys = sorted(data.keys(), key = int, reverse = True)
+	for timestamp in sorted_keys:
+		f.write((unicode(timestamp) + '\n').encode('utf-8'))
+		for hash_path in data[timestamp]:
+			f.write(u'\t'.join((hash_path[0], hash_path[1] + '\n')).encode('utf-8'))
+	f.close()
 
 def main():
 	"""main function. Called after run."""
@@ -135,8 +158,54 @@ In file_data & file path is matched
 		if '-n' in sys.argv:
 			return
 
-	#TODO : Modifying new_data to saving form
-	#TODO : Adding choicing feature
-	#TODO : Upload on Twitter
+	new_sorted = []
+	new_sorted = time_based_sort(new_data)
+	sorted_keys = sorted(new_sorted.keys(), key = int, reverse = True)
+
+	if ('-v' in sys.argv) or ('-N' in sys.argv):
+		if '-v' in sys.argv:
+			print '\nIntermediate file contents:'
+		for newtime in sorted_keys:
+			print newtime
+			for newtuple in new_sorted[newtime]:
+				print newtuple[0] + '\t' + newtuple[1]
+		if '-N' in sys.argv:
+			return
+
+	target_img_name = ''
+	if len(sorted_keys) == 1:
+		target_img = random.choice(new_sorted[sorted_keys[0]])
+		target_img_name = target_img[1]
+	elif len(sorted_keys) == 0:
+		pass
+	else:
+		if len(new_sorted[sorted_keys[-2]]) == 1:
+			target_img = new_sorted[sorted_keys[-2]][0]
+			target_img_name = target_img[1]
+			del new_sorted[sorted_keys[-2]]
+		else:
+			target_img = random.choice(new_sorted[sorted_keys[-2]])
+			target_img_name = target_img[1]
+			new_sorted[sorted_keys[-2]].remove(target_img)
+			new_sorted[sorted_keys[-1]].append(target_img)
+	sorted_keys = []		#To prevent referring legacy data
+
+	print 'target_img :', target_img_name
+
+	if not target_img_name == '':
+		try:
+			os.remove(TARGET_DST+'/random_yeolbyeon.png')
+		except OSError as e:
+			print e
+		try:
+			os.remove(TARGET_DST+'/random_yeolbyeon.jpg')
+		except OSError as e:
+			print e
+		if target_img_name[-4:] == '.png':
+			shutil.copyfile(target_img_name, TARGET_DST + '/random_yeolbyeon.png')
+		else:
+			shutil.copyfile(target_img_name, TARGET_DST + '/random_yeolbyeon.jpg')
+
+	write_list(new_sorted)
 #End of main()
 main()
