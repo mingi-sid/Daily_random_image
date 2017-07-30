@@ -72,7 +72,7 @@ def time_based_sort(data):
 	return result
 
 def write_list(data):
-	f = open(u"temp.txt", 'w')
+	f = open(IMAGE_LIST, 'w')
 	sorted_keys = sorted(data.keys(), key = int, reverse = True)
 	for timestamp in sorted_keys:
 		f.write((unicode(timestamp) + '\n').encode('utf-8'))
