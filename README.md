@@ -1,3 +1,7 @@
+Dependency
+ * Python 2.7
+ * tweepy 3.5
+ * PIL
 To use
  * Copy 'setting.ini-backup' and rename to 'setting.ini'
  * Modify setting.ini so that it fits to your system

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 
 import glob, os, sys
@@ -8,6 +8,7 @@ import random
 import shutil
 from ConfigParser import SafeConfigParser
 import codecs
+from PIL import Image
 
 import twitter
 
@@ -20,11 +21,7 @@ IMAGES_DIR = parser.get('filesystem', 'image_dir')
 TARGET_DIR = parser.get('filesystem', 'target_dir')
 TARGET_FILE = parser.get('filesystem', 'target_file')
 
-'''
-IMAGES_DIR = u"/mnt/d/Personal/KAIST/PASSION/170619_daily_random_image/Daily_random_image"#u"/home/hamster/열변"
-TARGET_DIR = u"/mnt/d/Personal/KAIST/PASSION/170619_daily_random_image/target"
-TARGET_FILE = u"random_yeolbyeon"
-'''
+TWEET_CONTENT = parser.get('tweet', 'tweet_content')
 
 TARGET_EXT = [u'jpg', u'bmp', u'png']
 IMAGE_LIST = u"imglist.txt"
@@ -34,7 +31,8 @@ HELP_MESSAGE = """  -h	Print this help message
   -n	Print merged list of images
   -N	Print merged imglist.txt, not actually modifying it
   -v	Verbose run
-  -i	Initial run."""
+  -i	Initial run.
+  --no-twitter	Does not access twitter account"""
 TIMESTAMP = int(time.time())
 
 def images_list(root, extensions):
@@ -211,6 +209,12 @@ In file_data & file path is matched
 	print 'target_img :', target_img_name
 	new_img_name = ''
 
+	img = Image.open(target_img_name)
+	basewidth = 1000
+	ratio = (basewidth / float(img.size[0]))
+	hsize = int((float(img.size[1]) * float(ratio)))
+	img_new = img.resize((basewidth, hsize), Image.ANTIALIAS)
+	
 	if not target_img_name == '':
 		if os.path.isfile(TARGET_DIR + '/'+TARGET_FILE+'.png'):
 			try:
@@ -223,18 +227,21 @@ In file_data & file path is matched
 			except OSError as e:
 				print e
 		if target_img_name[-4:] == '.png':
-			shutil.copyfile(target_img_name, TARGET_DIR + '/'+TARGET_FILE+'.png')
 			new_img_name = TARGET_DIR + '/'+TARGET_FILE+'.png'
+			img_new.save(new_img_name)
 		else:
-			shutil.copyfile(target_img_name, TARGET_DIR + '/'+TARGET_FILE+'.jpg')
 			new_img_name = TARGET_DIR + '/'+TARGET_FILE+'.jpg'
-	
+			img_new.save(new_img_name)
 
 	write_list(new_sorted)
+
+	if '--no-twitter' in sys.argv:
+		return
 
 	if '-i' in sys.argv:
 		twitter.main()
 
-	twitter.post_on_twitter(new_img_name)
+	twitter.post_on_twitter(new_img_name, TWEET_CONTENT)
+	return
 #End of main()
 main()

@@ -3,8 +3,8 @@
 
 import tweepy
 from ConfigParser import ConfigParser
- 
-def post_on_twitter(img_path):
+
+def post_on_twitter(img_path, content):
 	parser = ConfigParser()
 	parser.read('twitter.ini')
 	
@@ -19,7 +19,7 @@ def post_on_twitter(img_path):
 	api = tweepy.API(auth)
 
 	api.update_with_media(filename = img_path, \
-			status = u'#테스트', source = 'Daily_random_image')
+			status = content, source = 'Daily_random_image')
 
 def main():
 	parser = ConfigParser()
