@@ -1,13 +1,16 @@
-#!/usr/bin/python
+#!/usr/bin/python2.7
 # -*- coding: utf-8 -*-
 
 import tweepy
+import os
 from ConfigParser import ConfigParser
 
+parser = ConfigParser()
+ini_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), \
+'twitter.ini')
+parser.read(ini_path)
+
 def post_on_twitter(img_path, content):
-	parser = ConfigParser()
-	parser.read('twitter.ini')
-	
 	CONSUMER_KEY = parser.get('twitter', 'consumer_key')
 	CONSUMER_SECRET = parser.get('twitter', 'consumer_secret')
 	ACCESS_TOKEN = parser.get('twitter', 'access_token')
@@ -22,9 +25,6 @@ def post_on_twitter(img_path, content):
 			status = content, source = 'Daily_random_image')
 
 def main():
-	parser = ConfigParser()
-	parser.read('twitter.ini')
-	
 	CONSUMER_KEY = parser.get('twitter', 'consumer_key')
 	CONSUMER_SECRET = parser.get('twitter', 'consumer_secret')
 

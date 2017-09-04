@@ -14,7 +14,9 @@ import twitter
 
 parser = SafeConfigParser()
 
-with codecs.open('setting.ini', 'r', encoding='utf-8') as f:
+setting_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),\
+'setting.ini')
+with codecs.open(setting_path, 'r', encoding='utf-8') as f:
 	parser.readfp(f)
 
 IMAGES_DIR = parser.get('filesystem', 'image_dir')
@@ -24,7 +26,8 @@ TARGET_FILE = parser.get('filesystem', 'target_file')
 TWEET_CONTENT = parser.get('tweet', 'tweet_content')
 
 TARGET_EXT = [u'jpg', u'bmp', u'png']
-IMAGE_LIST = u"imglist.txt"
+IMAGE_LIST = os.path.join(os.path.dirname(os.path.abspath(__file__)),\
+"imglist.txt")
 HELP_MESSAGE = """  -h	Print this help message
   -f	Print hash and timestamp of image files
   -r	Read text file and print result
@@ -188,10 +191,16 @@ In file_data & file path is matched
 		if '-N' in sys.argv:
 			return
 
+	#Choose one image, randomly
 	target_img_name = ''
+	random.seed(TIMESTAMP)
 	if len(sorted_keys) == 1:
 		target_img = random.choice(new_sorted[sorted_keys[0]])
 		target_img_name = target_img[1]
+		new_sorted[sorted_keys[0]].remove(target_img)
+		new_sorted[str(int(sorted_keys[0])-1)] = [target_img, ]
+		if len(new_sorted[sorted_keys[0]]) == 0:
+			del new_sorted[sorted_keys[0]]
 	elif len(sorted_keys) == 0:
 		pass
 	else:
@@ -205,8 +214,11 @@ In file_data & file path is matched
 			new_sorted[sorted_keys[-2]].remove(target_img)
 			new_sorted[sorted_keys[-1]].append(target_img)
 	sorted_keys = []		#To prevent referring legacy data
+	if '-v' in sys.argv:
+		print 'result'
+		print target_img_name
 
-	print 'target_img :', target_img_name
+	#Resize and copy the chosen image to target dir.
 	new_img_name = ''
 
 	img = Image.open(target_img_name)
@@ -233,8 +245,10 @@ In file_data & file path is matched
 			new_img_name = TARGET_DIR + '/'+TARGET_FILE+'.jpg'
 			img_new.save(new_img_name)
 
+	#Update the imglist.txt file
 	write_list(new_sorted)
 
+	#Post on twitter
 	if '--no-twitter' in sys.argv:
 		return
 
