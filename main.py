@@ -191,6 +191,10 @@ In file_data & file path is matched
 		if '-N' in sys.argv:
 			return
 
+	# new_data : filehash -> (filepath, timestamp)
+	# new_sorted : timestamp -> [(filehash, filepath), ...]
+	# sorted_keys : [timestamp, ...], most recent comes first
+
 	#Choose one image, randomly
 	target_img_name = ''
 	random.seed(TIMESTAMP)
@@ -204,14 +208,14 @@ In file_data & file path is matched
 	elif len(sorted_keys) == 0:
 		pass
 	else:
-		if len(new_sorted[sorted_keys[-2]]) == 1:
-			target_img = new_sorted[sorted_keys[-2]][0]
+		if len(new_sorted[sorted_keys[0]]) == 1:
+			target_img = new_sorted[sorted_keys[0]][0]
 			target_img_name = target_img[1]
-			del new_sorted[sorted_keys[-2]]
+			del new_sorted[sorted_keys[0]]
 		else:
-			target_img = random.choice(new_sorted[sorted_keys[-2]])
+			target_img = random.choice(new_sorted[sorted_keys[0]])
 			target_img_name = target_img[1]
-			new_sorted[sorted_keys[-2]].remove(target_img)
+			new_sorted[sorted_keys[0]].remove(target_img)
 			new_sorted[sorted_keys[-1]].append(target_img)
 	sorted_keys = []		#To prevent referring legacy data
 	if '-v' in sys.argv:
